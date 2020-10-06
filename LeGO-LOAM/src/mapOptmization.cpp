@@ -64,12 +64,14 @@ private:
 
     ros::Publisher pubLaserCloudSurround;
     ros::Publisher pubOdomAftMapped;
+    ros::Publisher pubJBSpose;
     ros::Publisher pubKeyPoses;
 
     ros::Publisher pubHistoryKeyFrames;
     ros::Publisher pubIcpKeyFrames;
     ros::Publisher pubRecentKeyFrames;
     ros::Publisher pubRegisteredCloud;
+
 
     ros::Subscriber subLaserCloudCornerLast;
     ros::Subscriber subLaserCloudSurfLast;
@@ -78,6 +80,7 @@ private:
     ros::Subscriber subImu;
 
     nav_msgs::Odometry odomAftMapped;
+    geometry_msgs::PoseStamped pose_jbs;
     tf::StampedTransform aftMappedTrans;
     tf::TransformBroadcaster tfBroadcaster;
 
@@ -234,6 +237,8 @@ public:
         pubKeyPoses = nh.advertise<sensor_msgs::PointCloud2>("/key_pose_origin", 2);
         pubLaserCloudSurround = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surround", 2);
         pubOdomAftMapped = nh.advertise<nav_msgs::Odometry> ("/aft_mapped_to_init", 5);
+        pubJBSpose = nh.advertise<geometry_msgs::PoseStamped>("loam_jbs_pose",1);
+
 
         subLaserCloudCornerLast = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_corner_last", 2, &mapOptimization::laserCloudCornerLastHandler, this);
         subLaserCloudSurfLast = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf_last", 2, &mapOptimization::laserCloudSurfLastHandler, this);
@@ -671,6 +676,43 @@ public:
         odomAftMapped.twist.twist.linear.y = transformBefMapped[4];
         odomAftMapped.twist.twist.linear.z = transformBefMapped[5];
         pubOdomAftMapped.publish(odomAftMapped);
+
+        // JBS pose
+        Eigen::Quaternionf quat;
+        Eigen::Vector3f transl;
+        transl(0) = odomAftMapped.pose.pose.position.x;
+        transl(1) = odomAftMapped.pose.pose.position.y;
+        transl(2) = odomAftMapped.pose.pose.position.z;
+        quat.x() =  odomAftMapped.pose.pose.orientation.x;
+        quat.y() =  odomAftMapped.pose.pose.orientation.y;
+        quat.z() =  odomAftMapped.pose.pose.orientation.z;
+        quat.w() =  odomAftMapped.pose.pose.orientation.w;
+
+        Eigen::Matrix3f rotm_en;
+        Eigen::Affine3f transform;
+        rotm_en << 0,0,1,
+                1,0,0,
+                0,1,0;
+
+        quat.normalize();
+        transform.setIdentity();
+        transform.translate(transl);
+        transform.rotate(quat);
+
+        transform.prerotate(rotm_en);
+        transform.rotate(rotm_en.transpose()); // to enu
+
+        quat = Eigen::Quaternionf(transform.rotation());
+        pose_jbs.pose.position.x = transform.translation()(0);
+        pose_jbs.pose.position.y = transform.translation()(1);
+        pose_jbs.pose.position.z = transform.translation()(2);
+        pose_jbs.pose.orientation.w = quat.w();
+        pose_jbs.pose.orientation.x = quat.x();
+        pose_jbs.pose.orientation.y = quat.y();
+        pose_jbs.pose.orientation.z = quat.z();
+        pose_jbs.header.frame_id = "/map";
+        pose_jbs.header.stamp = ros::Time().fromSec(timeLaserOdometry);
+        pubJBSpose.publish(pose_jbs);
 
         aftMappedTrans.stamp_ = ros::Time().fromSec(timeLaserOdometry);
         aftMappedTrans.setRotation(tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));

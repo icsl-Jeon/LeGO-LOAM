@@ -57,15 +57,15 @@ extern const string imuTopic = "/imu/data";
 extern const string fileDirectory = "/tmp/";
 
 // Using velodyne cloud "ring" channel for image projection (other lidar may have different name for this channel, change "PointXYZIR" below)
-extern const bool useCloudRing = true; // if true, ang_res_y and ang_bottom are not used
+extern const bool useCloudRing = false; // if true, ang_res_y and ang_bottom are not used
 
 // VLP-16
 extern const int N_SCAN = 16;
-extern const int Horizon_SCAN = 1800;
-extern const float ang_res_x = 0.2;
+extern const int Horizon_SCAN = 900;
+extern const float ang_res_x = 0.4;
 extern const float ang_res_y = 2.0;
 extern const float ang_bottom = 15.0+0.1;
-extern const int groundScanInd = 7;
+extern const int groundScanInd = 2;
 
 // HDL-32E
 // extern const int N_SCAN = 32;
@@ -102,9 +102,9 @@ extern const int groundScanInd = 7;
 // extern const int groundScanInd = 15;
 
 extern const bool loopClosureEnableFlag = false;
-extern const double mappingProcessInterval = 0.3;
+extern const double mappingProcessInterval = 0.01;
 
-extern const float scanPeriod = 0.1;
+extern const float scanPeriod = 0.05;
 extern const int systemDelay = 0;
 extern const int imuQueLength = 200;
 
@@ -112,7 +112,7 @@ extern const float sensorMinimumRange = 1.0;
 extern const float sensorMountAngle = 0.0;
 extern const float segmentTheta = 60.0/180.0*M_PI; // decrese this value may improve accuracy
 extern const int segmentValidPointNum = 5;
-extern const int segmentValidLineNum = 3;
+extern const int segmentValidLineNum = 10;
 extern const float segmentAlphaX = ang_res_x / 180.0 * M_PI;
 extern const float segmentAlphaY = ang_res_y / 180.0 * M_PI;
 
@@ -120,8 +120,8 @@ extern const float segmentAlphaY = ang_res_y / 180.0 * M_PI;
 extern const int edgeFeatureNum = 2;
 extern const int surfFeatureNum = 4;
 extern const int sectionsTotal = 6;
-extern const float edgeThreshold = 0.1;
-extern const float surfThreshold = 0.1;
+extern const float edgeThreshold = 2.0;
+extern const float surfThreshold = 0.5;
 extern const float nearestFeatureSearchSqDist = 25;
 
 

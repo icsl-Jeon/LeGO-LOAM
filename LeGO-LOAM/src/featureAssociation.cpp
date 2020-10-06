@@ -1072,7 +1072,7 @@ public:
                                      (laserCloudCornerLast->points[j].z - pointSel.z);
 
                         if (int(laserCloudCornerLast->points[j].intensity) > closestPointScan) {
-                            if (pointSqDis < minPointSqDis2) {
+                            if (  pointSqDis < minPointSqDis2) {
                                 minPointSqDis2 = pointSqDis;
                                 minPointInd2 = j;
                             }

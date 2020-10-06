@@ -86,6 +86,9 @@ public:
     ImageProjection():
         nh("~"){
 
+
+
+
         subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>(pointCloudTopic, 1, &ImageProjection::cloudHandler, this);
 
         pubFullCloud = nh.advertise<sensor_msgs::PointCloud2> ("/full_cloud_projected", 1);
@@ -164,7 +167,21 @@ public:
 
         cloudHeader = laserCloudMsg->header;
         // cloudHeader.stamp = ros::Time::now(); // Ouster lidar users may need to uncomment this line
-        pcl::fromROSMsg(*laserCloudMsg, *laserCloudIn);
+
+        pcl::PointCloud<PointType>::Ptr cloudBeforeTrans (new pcl::PointCloud<PointType> ());
+
+        pcl::fromROSMsg(*laserCloudMsg, *cloudBeforeTrans);
+        Eigen::Affine3f transform_2 = Eigen::Affine3f::Identity();
+        transform_2.setIdentity();
+        Eigen::Matrix3f rotMat; rotMat.setZero();
+        rotMat(1,0) = 1;
+        rotMat(0,1) = 1;
+        rotMat(2,2) = -1;
+
+        transform_2.matrix().block(0,0,3,3) = rotMat;
+
+        pcl::transformPointCloud (*cloudBeforeTrans, *laserCloudIn, transform_2);
+
         // Remove Nan points
         std::vector<int> indices;
         pcl::removeNaNFromPointCloud(*laserCloudIn, *laserCloudIn, indices);
