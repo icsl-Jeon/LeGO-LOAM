@@ -461,7 +461,6 @@ public:
     void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg){
 
         cloudHeader = laserCloudMsg->header;
-
         timeScanCur = cloudHeader.stamp.toSec();
         timeNewSegmentedCloud = timeScanCur;
 

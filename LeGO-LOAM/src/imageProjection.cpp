@@ -168,6 +168,8 @@ public:
         cloudHeader = laserCloudMsg->header;
         // cloudHeader.stamp = ros::Time::now(); // Ouster lidar users may need to uncomment this line
 
+        cloudHeader.stamp = ros::Time::now();
+
         pcl::PointCloud<PointType>::Ptr cloudBeforeTrans (new pcl::PointCloud<PointType> ());
 
         pcl::fromROSMsg(*laserCloudMsg, *cloudBeforeTrans);
@@ -181,7 +183,7 @@ public:
         transform_2.matrix().block(0,0,3,3) = rotMat;
 
         pcl::transformPointCloud (*cloudBeforeTrans, *laserCloudIn, transform_2);
-
+        laserCloudIn->header = cloudBeforeTrans->header;
         // Remove Nan points
         std::vector<int> indices;
         pcl::removeNaNFromPointCloud(*laserCloudIn, *laserCloudIn, indices);
