@@ -108,7 +108,7 @@ extern const float scanPeriod = 0.05;
 extern const int systemDelay = 0;
 extern const int imuQueLength = 200;
 
-extern const float sensorMinimumRange = 1.0;
+extern const float sensorMinimumRange = 0.3;
 extern const float sensorMountAngle = 0.0;
 extern const float segmentTheta = 60.0/180.0*M_PI; // decrese this value may improve accuracy
 extern const int segmentValidPointNum = 5;
